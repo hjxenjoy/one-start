@@ -1,12 +1,13 @@
 {
   "name": "one-start",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "start or build js project with only one command",
   "main": "index.js",
   "bin": {
     "one-start": "index.js"
   },
-  "files": ["index.js",
+  "files": [
+    "index.js",
     "createConfig.d.ts"
   ],
   "scripts": {
