@@ -5,12 +5,14 @@ export type ConfigData = {
 }
 
 type TagAttribute = {
+  code?: string
   [key: string]: string
 }
 
 export type BodyTag = {
   links: TagAttribute[]
   scripts: TagAttribute[]
+  styles: TagAttribute[]
 }
 
 export type HeadTag = {
@@ -34,6 +36,7 @@ export interface ConfigType {
     body: BodyTag
     createLink(attrs: TagAttribute): string
     createScript(attrs: TagAttribute): string
+    createStyle(attrs: TagAttribute): string
     html: string
   }): void
   uploadCommand?: PropertyType

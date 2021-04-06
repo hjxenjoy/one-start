@@ -15,8 +15,9 @@ const Config = createConfig({
   beforeStart(config) {
     console.log('ready', config)
   },
-  afterBuild({ head, body, createLink, createScript }) {
+  afterBuild({ head, body, createLink, createScript, createStyle }) {
     const text = head.links.map(link => createLink(link))
+    text.push(...head.styles.map(style => createStyle(style)))
     text.push(...body.scripts.map(script => createScript(script)))
     console.log(text.join('\n'))
   },
@@ -27,7 +28,7 @@ const Config = createConfig({
     env: {
       // PUBLIC_URL: ({host, stage}) => `https://${host}.your.domain.com/${stage}/`,
       BUILD_PATH: ({ host, stage }) => `dist/${host}-${stage}`,
-      INLINE_RUNTIME_CHUNK: false,
+      // INLINE_RUNTIME_CHUNK: false,
     },
   },
   stages: {

@@ -24,8 +24,15 @@ function createLink(linkAttributes) {
 }
 
 function createScript(scriptAttributes) {
-  const attrs = Object.keys(scriptAttributes).map(key => `${key}="${scriptAttributes[key]}"`).join(' ')
-  return `<script ${attrs}></script>`
+  const { code = '', ...scriptAttrs } = scriptAttributes
+  const attrs = Object.keys(scriptAttrs ).map(key => `${key}="${scriptAttrs[key]}"`).join(' ')
+  return `<script ${attrs}>${code}</script>`
+}
+
+function createStyle(styleAttributes) {
+  const { code = '', ...styleAttrs } = styleAttributes
+  const attrs = Object.keys(styleAttrs ).map(key => `${key}="${styleAttrs[key]}"`).join(' ')
+  return `<style ${attrs}>${code}</style>`
 }
 
 function extractHTML(html) {
@@ -36,29 +43,59 @@ function extractHTML(html) {
   })
   const headScripts = []
   $('head script').each(function () {
-    headScripts.push({ ...this.attribs })
+    if (this.children.length) {
+      headScripts.push({
+        ...this.attribs,
+        code: this.children.filter(node => node.type === 'text').map(node => node.data).join('\n'),
+      })
+    } else {
+      headScripts.push({ ...this.attribs })
+    }
   })
   const headLinks = []
   $('head link').each(function () {
     headLinks.push({ ...this.attribs })
   })
+  const headStyles = []
+  $('head style').each(function () {
+    headStyles.push({
+      ...this.attribs,
+      code: this.children.filter(node => node.type === 'text').map(node => node.data).join('\n'),
+    })
+  })
   const bodyScripts = []
   $('body script').each(function () {
-    bodyScripts.push({ ...this.attribs })
+    if (this.children.length) {
+      bodyScripts.push({
+        ...this.attribs,
+        code: this.children.filter(node => node.type === 'text').map(node => node.data).join('\n'),
+      })
+    } else {
+      bodyScripts.push({ ...this.attribs })
+    }
   })
   const bodyLinks = []
   $('body link').each(function () {
     bodyLinks.push({ ...this.attribs })
+  })
+  const bodyStyles = []
+  $('body style').each(function () {
+    bodyStyles.push({
+      ...this.attribs,
+      code: this.children.filter(node => node.type === 'text').map(node => node.data).join('\n'),
+    })
   })
 
   const head = {
     metas,
     scripts: headScripts,
     links: headLinks,
+    styles: headStyles,
   }
   const body = {
     links: bodyLinks,
     scripts: bodyScripts,
+    styles: bodyStyles,
   }
   return { head, body }
 }
@@ -183,7 +220,7 @@ async function bootstrap() {
 
   // after build
   if (typeof config.afterBuild === 'function') {
-    config.afterBuild({ ...data, head, body, html, createLink, createScript })
+    config.afterBuild({ ...data, head, body, html, createLink, createScript, createStyle })
   }
 }
 
