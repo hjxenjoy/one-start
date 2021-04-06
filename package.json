@@ -1,6 +1,6 @@
 {
   "name": "one-start",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "start or build js project with only one command",
   "main": "index.js",
   "bin": {
