@@ -1,4 +1,6 @@
-const Config = {
+const createConfig = require('../createConfig')
+
+const Config = createConfig({
   devCommand: 'react-scripts start',
   buildCommand: 'react-scripts build',
   hosts: [{
@@ -18,9 +20,9 @@ const Config = {
     text.push(...body.scripts.map(script => createScript(script)))
     console.log(text.join('\n'))
   },
-  uploadCommand: ({host, stage }) => {
-    return `scp -r ${host}-${stage}-build/static root@remote:/remote/static/path`
-  },
+  // uploadCommand: ({host, stage }) => {
+  //   return `scp -r ${host}-${stage}-build/static root@remote:/remote/static/path`
+  // },
   common: {
     env: {
       // PUBLIC_URL: ({host, stage}) => `https://${host}.your.domain.com/${stage}/`,
@@ -45,8 +47,11 @@ const Config = {
         OS_PROJECT_TITLE: ({host}) => `Project-${host}`
       }
     },
-    production: {},
+    production: {
+      description: 'Online',
+      env: {},
+    },
   },
-}
+})
 
 module.exports = Config
