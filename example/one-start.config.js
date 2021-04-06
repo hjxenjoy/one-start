@@ -48,10 +48,7 @@ const Config = createConfig({
         OS_PROJECT_TITLE: ({host}) => `Project-${host}`
       }
     },
-    production: {
-      description: 'Online',
-      env: {},
-    },
+    production: {},
   },
 })
 

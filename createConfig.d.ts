@@ -46,7 +46,7 @@ export interface ConfigType {
   stages: {
     [stage: string]: {
       description?: string
-      env: EnvType
+      env?: EnvType
     }
   }
 }
