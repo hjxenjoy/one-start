@@ -8,7 +8,7 @@
   },
   "files": [
     "index.js",
-    "createConfig.d.ts"
+    "createConfig.*"
   ],
   "scripts": {
     "release": "release-it"
