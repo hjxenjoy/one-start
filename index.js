@@ -18,21 +18,23 @@ function readConfigFile() {
   return require(configFilePath)
 }
 
+function stringifyAttributes(attrs) {
+  const attrString = Object.keys(attrs).map(key => !attrs[key] ? key : `${key}="${attrs[key]}"`).join(' ')
+  return attrString.length ? ` ${attrString}` : ''
+}
+
 function createLink(linkAttributes) {
-  const attrs = Object.keys(linkAttributes).map(key => `${key}="${linkAttributes[key]}"`).join(' ')
-  return `<link ${attrs}/>`
+  return `<link${stringifyAttributes(linkAttributes)}/>`
 }
 
 function createScript(scriptAttributes) {
   const { code = '', ...scriptAttrs } = scriptAttributes
-  const attrs = Object.keys(scriptAttrs ).map(key => `${key}="${scriptAttrs[key]}"`).join(' ')
-  return `<script ${attrs}>${code}</script>`
+  return `<script${stringifyAttributes(scriptAttrs)}>${code}</script>`
 }
 
 function createStyle(styleAttributes) {
   const { code = '', ...styleAttrs } = styleAttributes
-  const attrs = Object.keys(styleAttrs ).map(key => `${key}="${styleAttrs[key]}"`).join(' ')
-  return `<style ${attrs}>${code}</style>`
+  return `<style${stringifyAttributes(styleAttrs)}>${code}</style>`
 }
 
 function extractHTML(html) {
