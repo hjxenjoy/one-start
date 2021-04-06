@@ -141,7 +141,7 @@ async function bootstrap() {
 
   const stages = getStageChoices(config.stages)
 
-  const { stage } = stages.length ? await enquirer.prompt({
+  const { stage } = stages.length ? stages.length === 1 ? { stage: stages[0].name } : await enquirer.prompt({
     type: 'select',
     name: 'stage',
     message: 'Select Stage Environment Config',
