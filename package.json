@@ -1,0 +1,39 @@
+{
+  "name": "one-start",
+  "version": "0.0.1",
+  "description": "start or build js project with only one command",
+  "main": "index.js",
+  "bin": {
+    "one-start": "index.js"
+  },
+  "files": ["index.js", "index.d.ts"],
+  "scripts": {
+    "release": "release-it"
+  },
+  "keywords": [],
+  "author": "Jinxin Hu <hjxenjoy@gmail.com> (https://hujin.xin/)",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "cheerio": "^1.0.0-rc.5",
+    "cross-env": "^7.0.3",
+    "enquirer": "^2.3.6",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "release-it": "^14.5.1"
+  },
+  "github": {
+    "release": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hjxenjoy/one-start.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hjxenjoy/one-start/issues"
+  },
+  "homepage": "https://github.com/hjxenjoy/one-start#readme"
+}
