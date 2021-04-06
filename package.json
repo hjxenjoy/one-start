@@ -6,7 +6,9 @@
   "bin": {
     "one-start": "index.js"
   },
-  "files": ["index.js", "index.d.ts"],
+  "files": ["index.js",
+    "createConfig.d.ts"
+  ],
   "scripts": {
     "release": "release-it"
   },

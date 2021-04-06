@@ -32,8 +32,8 @@ export interface ConfigType {
   afterBuild?(data: ConfigData & {
     head: HeadTag
     body: BodyTag
-    createLink(attrs: TagAttribute[]): string
-    createScript(attrs: TagAttribute[]): string
+    createLink(attrs: TagAttribute): string
+    createScript(attrs: TagAttribute): string
     html: string
   }): void
   uploadCommand?: PropertyType
@@ -42,7 +42,10 @@ export interface ConfigType {
   }
   stages: {
     [stage: string]: {
+      description?: string
       env: EnvType
     }
   }
 }
+
+export default function createConfig(config: ConfigType): ConfigType
