@@ -10,10 +10,29 @@ const Config = createConfig({
     name: 'B',
     message: 'Publish/Start at Host B',
   }],
+  options: [
+    {
+      name: 'protocol',
+      message: 'Please Select Protocol',
+      choices: ['http', 'https'],
+      initial: 'http'
+    },
+    {
+      name: 'entries',
+      message: 'Please Select Your Entry File',
+      multiple: true,
+      choices: [
+        { name: 'home', message: 'Home' },
+        { name: 'about', message: 'About' },
+        { name: 'article', message: 'Article' },
+      ],
+      initial: 'home'
+    }
+  ],
   buildDir: ({host, stage}) => `dist/${host}-${stage}`,
   buildHTML: 'index.html',
   beforeStart(config) {
-    console.log('ready', config)
+    console.log('config data:\n', config)
   },
   afterBuild({ head, body, createLink, createScript, createStyle }) {
     const text = head.links.map(link => createLink(link))

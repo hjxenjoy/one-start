@@ -117,6 +117,18 @@ function getStageChoices(stageConfig) {
   })
 }
 
+async function promptOptions(options, acc = {}) {
+  const option = options.shift()
+  option.type = 'select'
+
+  const result = await enquirer.prompt(option)
+  acc[option.name] = result[option.name]
+  if (options.length) {
+    return promptOptions(options, acc)
+  }
+  return acc
+}
+
 async function bootstrap() {
   const config = readConfigFile()
 
@@ -149,8 +161,12 @@ async function bootstrap() {
     initial: stages[0].name,
   }) : { stage: undefined }
 
-  const data = { mode, host, stage }
+  let data = { mode, host, stage }
   // console.log(data)
+
+  if (config.options) {
+    data = await promptOptions(config.options, data)
+  }
 
   const { env: stageEnv } = stage ? config.stages[stage] : {}
   const { env: commonEnv } = config.common || {}

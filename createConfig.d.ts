@@ -1,7 +1,8 @@
-export type ConfigData = {
+type ConfigData = {
   mode: 'start' | 'build'
   host?: string
   stage?: string
+  [x: string]: string | string[]
 }
 
 type TagAttribute = {
@@ -9,19 +10,34 @@ type TagAttribute = {
   [key: string]: string
 }
 
-export type BodyTag = {
+type BodyTag = {
   links: TagAttribute[]
   scripts: TagAttribute[]
   styles: TagAttribute[]
 }
 
-export type HeadTag = {
+type HeadTag = {
   metas: TagAttribute[]
 } & BodyTag
 
-export type PropertyType = string | ((data: ConfigData) => string)
-export type EnvType = {
+type PropertyType = string | ((data: ConfigData) => string)
+type EnvType = {
   [envKey: string]: string | number | boolean | ((data: ConfigData) => string | number | boolean)
+}
+type CreateElement = (attrs: TagAttribute) => string
+
+type AfterBuild = (data: ConfigData & {
+  head: HeadTag
+  body: BodyTag
+  html: string
+  createLink: CreateElement
+  createScript: CreateElement
+  createStyle: CreateElement
+}) => void
+
+interface Choice {
+  name: string
+  message?: string
 }
 
 export interface ConfigType {
@@ -31,24 +47,22 @@ export interface ConfigType {
   buildDir?: PropertyType
   buildHTML?: PropertyType
   beforeStart?(data: ConfigData): void
-  afterBuild?(data: ConfigData & {
-    head: HeadTag
-    body: BodyTag
-    createLink(attrs: TagAttribute): string
-    createScript(attrs: TagAttribute): string
-    createStyle(attrs: TagAttribute): string
-    html: string
-  }): void
+  afterBuild?: AfterBuild
   uploadCommand?: PropertyType
-  common?: {
-    env: EnvType
-  }
+  common?: { env: EnvType }
   stages: {
     [stage: string]: {
       description?: string
       env?: EnvType
     }
   }
+  options: {
+    name: string
+    message?: string
+    choices: string[] | Choice[]
+    multiple?: boolean
+    initial?: any
+  }[]
 }
 
 export default function createConfig(config: ConfigType): ConfigType
