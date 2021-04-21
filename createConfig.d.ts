@@ -1,5 +1,6 @@
+type getCommand = (command: PropertyType, context: ConfigData) => string
+
 type ConfigData = {
-  mode: 'start' | 'build'
   host?: string
   stage?: string
   [x: string]: string | string[]
@@ -41,8 +42,8 @@ interface Choice {
 }
 
 export interface ConfigType {
-  devCommand: string
-  buildCommand: string
+  devCommand: PropertyType
+  buildCommand: PropertyType
   hosts?: {name: string, message?: string}[]
   buildDir?: PropertyType
   buildHTML?: PropertyType

@@ -9,6 +9,10 @@ const cheerio = require('cheerio')
 
 const configFileName = 'one-start.config.js'
 
+function getCommand(command, context) {
+  return typeof command === 'function' ? command(context) : command
+}
+
 function readConfigFile() {
   const configFilePath = path.resolve(process.cwd(), configFileName)
   if (!fs.existsSync(configFilePath)) {
@@ -132,23 +136,12 @@ async function promptOptions(options, acc = {}) {
 async function bootstrap() {
   const config = readConfigFile()
 
-  const { mode } = await enquirer.prompt({
-    type: 'select',
-    name: 'mode',
-    message: 'Select Start Mode',
-    choices: [
-      { name: 'start', message: 'Dev' },
-      { name: 'build', message: 'Build' },
-    ],
-    initial: 'start'
-  })
-
   const { host } = config.hosts && config.hosts.length ? await enquirer.prompt({
     type: 'select',
     name: 'host',
     message: 'Select Host',
     choices: config.hosts,
-    initial: config.hosts[0].name,
+    initial: 0,
   }) : { host: undefined }
 
   const stages = getStageChoices(config.stages)
@@ -158,11 +151,10 @@ async function bootstrap() {
     name: 'stage',
     message: 'Select Stage Environment Config',
     choices: stages,
-    initial: stages[0].name,
+    initial: 0,
   }) : { stage: undefined }
 
-  let data = { mode, host, stage }
-  // console.log(data)
+  let data = { host, stage }
 
   if (config.options) {
     data = await promptOptions(config.options, data)
@@ -185,10 +177,22 @@ async function bootstrap() {
     return acc
   }, {})
 
-  // console.log(env)
-
   Object.keys(env).forEach((key) => {
     process.env[key] = env[key]
+  })
+
+  const { mode } = await enquirer.prompt({
+    type: 'select',
+    name: 'mode',
+    message: 'Select Start Mode',
+    choices: [
+      { name: 'start', message: 'Dev' },
+      { name: 'build', message: 'Build + Upload + Extract' },
+      { name: 'buildOnly', message: 'Build + Confirm Next' },
+      { name: 'extract', message: 'Extract exist assets' },
+      { name: 'upload', message: 'Upload exist assets' },
+    ],
+    initial: 0,
   })
 
   // before start
@@ -198,20 +202,67 @@ async function bootstrap() {
 
   // start dev server
   if (mode === 'start') {
-    console.log(`☕️ ${chalk.yellow('Start Dev Server...')}\n`)
-    shell.exec(config.devCommand)
+    console.log(`☕️ ${chalk.yellowBright('Start Dev Server...')}\n`)
+    shell.exec(getCommand(config.devCommand, data))
     return
   }
 
-  // build
-  console.log(`☕️ ${chalk.blue('Start Building...')}\n`)
-  shell.exec(config.buildCommand)
-  console.log(`🎉 ${chalk.green('Build Success!')}\n`)
+  if (mode === 'build') {
+    doBuild()
+    doUpload()
+    doExtract()
+    return
+  }
+
+  if (mode === 'extract') {
+    doExtract()
+    return
+  }
+
+  if (mode === 'upload') {
+    doUpload()
+    return
+  }
+
+  if (mode === 'buildOnly') {
+    doBuild()
+
+    const { next } = await enquirer.prompt({
+      type: 'select',
+      name: 'next',
+      message: 'Do something after build',
+      choices: [
+        { name: 'upload', message: 'Upload assets' },
+        { name: 'extract', message: 'Extract assets' },
+        { name: 'both', message: 'Upload & Extract assets' },
+      ],
+      initial: 2,
+    })
+
+    if (next === 'upload' || next === 'both') {
+      doUpload()
+    }
+
+    if (next === 'extract' || next === 'both') {
+      doExtract()
+    }
+  }
+
+  function doBuild() {
+    console.log(`☕️ ${chalk.blueBright('Start Building...')}\n`)
+    shell.exec(getCommand(config.buildCommand, data))
+    console.log(`🎉 ${chalk.greenBright('Build Success!')}\n`)
+  }
 
   // exec upload command
-  if (typeof config.uploadCommand !== 'undefined') {
-    console.log(`🚀 ${chalk.blue('Start Uploading')}\n`)
-    const uploadCommand = typeof config.uploadCommand === 'function' ? config.uploadCommand(data) : config.uploadCommand
+  function doUpload() {
+    const uploadCommand = getCommand(config.uploadCommand, data)
+    if (typeof uploadCommand === 'undefined') {
+      console.log(chalk.yellowBright('Miss uploadCommand config.'))
+      console.log()
+      return
+    }
+    console.log(`🚀 ${chalk.blueBright('Start Uploading')}\n`)
     try {
       shell.exec(uploadCommand)
     } catch (e) {
@@ -220,24 +271,28 @@ async function bootstrap() {
     console.log()
   }
 
-  // extract elements from build html
-  const buildDir = typeof config.buildDir === 'function' ? config.buildDir(data) : config.buildDir
-  const buildHTML = typeof config.buildHTML === 'function' ? config.buildHTML(data) : (config.buildHTML || 'index.html')
-  if (!buildDir) {
-    console.log(chalk.yellowBright('Miss buildDir config.'))
-    return
-  }
+  function doExtract() {
+    if (typeof config.afterBuild !== 'function') {
+      console.log(chalk.yellowBright('Miss afterBuild config.'))
+      return
+    }
+    // extract elements from build html
+    const buildDir = getCommand(config.buildDir, data)
+    const buildHTML = getCommand(config.buildHTML, data) || 'index.html'
+    if (!buildDir) {
+      console.log(chalk.yellowBright('Miss buildDir config.'))
+      console.log()
+      return
+    }
 
-  const htmlPath = path.resolve(process.cwd(), buildDir, buildHTML)
-  if (!fs.existsSync(htmlPath)) {
-    console.log(chalk.red(htmlPath, 'is not exist!'))
-    return
-  }
-  const html = fs.readFileSync(htmlPath).toString()
-  const { head, body } = extractHTML(html)
-
-  // after build
-  if (typeof config.afterBuild === 'function') {
+    const htmlPath = path.resolve(process.cwd(), buildDir, buildHTML)
+    if (!fs.existsSync(htmlPath)) {
+      console.log(chalk.redBright(htmlPath, 'is not exist!'))
+      console.log()
+      return
+    }
+    const html = fs.readFileSync(htmlPath).toString()
+    const { head, body } = extractHTML(html)
     config.afterBuild({ ...data, head, body, html, createLink, createScript, createStyle })
   }
 }

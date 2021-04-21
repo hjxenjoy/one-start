@@ -15,7 +15,7 @@ const Config = createConfig({
       name: 'protocol',
       message: 'Please Select Protocol',
       choices: ['http', 'https'],
-      initial: 'http'
+      initial: 0,
     },
     {
       name: 'entries',
@@ -26,7 +26,7 @@ const Config = createConfig({
         { name: 'about', message: 'About' },
         { name: 'article', message: 'Article' },
       ],
-      initial: 'home'
+      initial: 0,
     }
   ],
   buildDir: ({host, stage}) => `dist/${host}-${stage}`,
