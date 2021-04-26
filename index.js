@@ -235,9 +235,14 @@ async function bootstrap() {
         { name: 'upload', message: 'Upload assets' },
         { name: 'extract', message: 'Extract assets' },
         { name: 'both', message: 'Upload & Extract assets' },
+        { name: 'exit', message: 'Exit' },
       ],
       initial: 2,
     })
+
+    if (next === 'exit') {
+      return
+    }
 
     if (next === 'upload' || next === 'both') {
       doUpload()
