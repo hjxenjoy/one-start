@@ -63,6 +63,7 @@ export interface ConfigType {
     choices: string[] | Choice[]
     multiple?: boolean
     initial?: any
+    stages?: string[]
   }[]
 }
 

@@ -16,6 +16,7 @@ const Config = createConfig({
       message: 'Please Select Protocol',
       choices: ['http', 'https'],
       initial: 0,
+      stages: ['development'],
     },
     {
       name: 'entries',
@@ -58,7 +59,7 @@ const Config = createConfig({
     },
     testing: {
       env: {
-        PUBLIC_URL: 'http://your-test-env.domain.com/',
+        PUBLIC_URL: 'https://your-test-env.domain.com/',
       }
     },
     'pre-release': {

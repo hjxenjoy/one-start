@@ -121,21 +121,26 @@ function getStageChoices(stageConfig) {
   })
 }
 
-async function promptOptions(options, acc = {}) {
+async function promptOptions(options, acc = {}, stage) {
   const option = options.shift()
   option.type = 'select'
 
-  const result = await enquirer.prompt(option)
-  acc[option.name] = result[option.name]
-  if (options.length) {
-    return promptOptions(options, acc)
+  if (!stage || !option.stages || !option.stages.length || option.stages.includes(stage)) {
+    const result = await enquirer.prompt(option)
+    acc[option.name] = result[option.name]
   }
+
+  if (options.length) {
+    return promptOptions(options, acc, stage)
+  }
+
   return acc
 }
 
 async function bootstrap() {
   const config = readConfigFile()
 
+  // host
   const { host } = config.hosts && config.hosts.length ? await enquirer.prompt({
     type: 'select',
     name: 'host',
@@ -144,8 +149,8 @@ async function bootstrap() {
     initial: 0,
   }) : { host: undefined }
 
+  // stage
   const stages = getStageChoices(config.stages)
-
   const { stage } = stages.length ? stages.length === 1 ? { stage: stages[0].name } : await enquirer.prompt({
     type: 'select',
     name: 'stage',
@@ -157,7 +162,7 @@ async function bootstrap() {
   let data = { host, stage }
 
   if (config.options) {
-    data = await promptOptions(config.options, data)
+    data = await promptOptions(config.options, data, stage)
   }
 
   const { env: stageEnv } = stage ? config.stages[stage] : {}
@@ -181,16 +186,16 @@ async function bootstrap() {
     process.env[key] = env[key]
   })
 
-  const { mode } = await enquirer.prompt({
+  const { mode } = stage === 'development' ? { mode: 'start' } : await enquirer.prompt({
     type: 'select',
     name: 'mode',
     message: 'Select Start Mode',
     choices: [
-      { name: 'start', message: 'Dev' },
+      // { name: 'start', message: 'Dev(stage for development)' },
       { name: 'build', message: 'Build + Upload + Extract' },
       { name: 'buildOnly', message: 'Build + Confirm Next' },
-      { name: 'extract', message: 'Extract exist assets' },
-      { name: 'upload', message: 'Upload exist assets' },
+      { name: 'extract', message: 'Extract Assets in Build Folder' },
+      { name: 'upload', message: 'Upload Assets from Build Folder' },
     ],
     initial: 0,
   })
