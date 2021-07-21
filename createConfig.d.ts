@@ -42,6 +42,7 @@ interface Choice {
 }
 
 export interface ConfigType {
+  locale?: 'en' | 'zh-CN'
   devCommand: PropertyType
   buildCommand: PropertyType
   hosts?: {name: string, message?: string}[]

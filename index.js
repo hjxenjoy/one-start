@@ -6,6 +6,8 @@ const chalk = require('chalk')
 const enquirer = require('enquirer')
 const shell = require('shelljs')
 const cheerio = require('cheerio')
+const enLocale = require('./locales/en')
+const zhCNLocale = require('./locales/zh-CN')
 
 const configFileName = 'one-start.config.js'
 
@@ -139,12 +141,13 @@ async function promptOptions(options, acc = {}, stage) {
 
 async function bootstrap() {
   const config = readConfigFile()
+  const locale = (config.locale || 'en') === 'zh-CN' ? zhCNLocale : enLocale
 
   // host
   const { host } = config.hosts && config.hosts.length ? await enquirer.prompt({
     type: 'select',
     name: 'host',
-    message: 'Select Host',
+    message: locale.selectHost,
     choices: config.hosts,
     initial: 0,
   }) : { host: undefined }
@@ -154,7 +157,7 @@ async function bootstrap() {
   const { stage } = stages.length ? stages.length === 1 ? { stage: stages[0].name } : await enquirer.prompt({
     type: 'select',
     name: 'stage',
-    message: 'Select Stage Environment Config',
+    message: locale.selectStage,
     choices: stages,
     initial: 0,
   }) : { stage: undefined }
@@ -189,13 +192,12 @@ async function bootstrap() {
   const { mode } = stage === 'development' ? { mode: 'start' } : await enquirer.prompt({
     type: 'select',
     name: 'mode',
-    message: 'Select Start Mode',
+    message: locale.selectMode,
     choices: [
-      // { name: 'start', message: 'Dev(stage for development)' },
-      { name: 'build', message: 'Build + Upload + Extract' },
-      { name: 'buildOnly', message: 'Build + Confirm Next' },
-      { name: 'extract', message: 'Extract Assets in Build Folder' },
-      { name: 'upload', message: 'Upload Assets from Build Folder' },
+      { name: 'build', message: locale.mode.build },
+      { name: 'buildOnly', message: locale.mode.buildOnly },
+      { name: 'extract', message: locale.mode.extract },
+      { name: 'upload', message: locale.mode.upload },
     ],
     initial: 0,
   })
@@ -207,7 +209,7 @@ async function bootstrap() {
 
   // start dev server
   if (mode === 'start') {
-    console.log(`☕️ ${chalk.yellowBright('Start Dev Server...')}\n`)
+    console.log(`☕️ ${chalk.yellowBright(locale.startDev)}\n`)
     shell.exec(getCommand(config.devCommand, data))
     return
   }
@@ -235,12 +237,12 @@ async function bootstrap() {
     const { next } = await enquirer.prompt({
       type: 'select',
       name: 'next',
-      message: 'Do something after build',
+      message: locale.selectNext,
       choices: [
-        { name: 'upload', message: 'Upload assets' },
-        { name: 'extract', message: 'Extract assets' },
-        { name: 'both', message: 'Upload & Extract assets' },
-        { name: 'exit', message: 'Exit' },
+        { name: 'upload', message: locale.next.upload},
+        { name: 'extract', message: locale.next.extract},
+        { name: 'both', message: locale.next.both},
+        { name: 'exit', message: locale.next.exit},
       ],
       initial: 2,
     })
@@ -259,20 +261,20 @@ async function bootstrap() {
   }
 
   function doBuild() {
-    console.log(`☕️ ${chalk.blueBright('Start Building...')}\n`)
+    console.log(`☕️ ${chalk.blueBright(locale.startBuild)}\n`)
     shell.exec(getCommand(config.buildCommand, data))
-    console.log(`🎉 ${chalk.greenBright('Build Success!')}\n`)
+    console.log(`🎉 ${chalk.greenBright(locale.buildSuccess)}\n`)
   }
 
   // exec upload command
   function doUpload() {
     const uploadCommand = getCommand(config.uploadCommand, data)
     if (typeof uploadCommand === 'undefined') {
-      console.log(chalk.yellowBright('Miss uploadCommand config.'))
+      console.log(chalk.yellowBright(locale.uploadCommandNotFound))
       console.log()
       return
     }
-    console.log(`🚀 ${chalk.blueBright('Start Uploading')}\n`)
+    console.log(`🚀 ${chalk.blueBright(locale.startUpload)}\n`)
     try {
       shell.exec(uploadCommand)
     } catch (e) {
@@ -283,21 +285,21 @@ async function bootstrap() {
 
   function doExtract() {
     if (typeof config.afterBuild !== 'function') {
-      console.log(chalk.yellowBright('Miss afterBuild config.'))
+      console.log(chalk.yellowBright(locale.afterBuildNotFound))
       return
     }
     // extract elements from build html
     const buildDir = getCommand(config.buildDir, data)
     const buildHTML = getCommand(config.buildHTML, data) || 'index.html'
     if (!buildDir) {
-      console.log(chalk.yellowBright('Miss buildDir config.'))
+      console.log(chalk.yellowBright(locale.buildDirNotFound))
       console.log()
       return
     }
 
     const htmlPath = path.resolve(process.cwd(), buildDir, buildHTML)
     if (!fs.existsSync(htmlPath)) {
-      console.log(chalk.redBright(htmlPath, 'is not exist!'))
+      console.log(chalk.redBright(locale.buildHTMLNotFound(htmlPath)))
       console.log()
       return
     }

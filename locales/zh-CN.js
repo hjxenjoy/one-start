@@ -1,0 +1,26 @@
+module.exports = {
+  selectHost: '选择Host',
+  selectStage: '选择环境配置',
+  selectMode: '选择启动方式',
+  selectNext: '选择构建后的下一步操作',
+  next: {
+    upload: '上传静态资源',
+    extract: '提取静态资源配置',
+    both: '上传并提取静态资源配置',
+    exit: '退出',
+  },
+  mode: {
+    build: '构建 + 上传静态资源 + 提取静态资源配置',
+    buildOnly: '只构建',
+    extract: '提取构建后的静态资源配置',
+    upload: '上传静态资源',
+  },
+  startDev: '开始启动开发服务器',
+  startBuild: '开发构建',
+  buildSuccess: '构建成功!',
+  uploadCommandNotFound: '找不到上传静态资源命令(uploadCommand)配置',
+  startUpload: '开始上传静态资源',
+  afterBuildNotFound: '找不到afterBuild方法',
+  buildDirNotFound: '找不到构建目录(buildDir)配置',
+  buildHTMLNotFound: (htmlPath) => `找不到 ${htmlPath}!`,
+}

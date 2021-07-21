@@ -1,6 +1,7 @@
 const createConfig = require('../createConfig')
 
 const Config = createConfig({
+  locale: 'zh-CN',
   devCommand: 'react-scripts start',
   buildCommand: 'react-scripts build',
   hosts: [{
