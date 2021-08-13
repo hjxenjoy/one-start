@@ -164,7 +164,7 @@ async function bootstrap() {
 
   let data = { host, stage }
 
-  if (config.options) {
+  if (config.options && config.options.length) {
     data = await promptOptions(config.options, data, stage)
   }
 
